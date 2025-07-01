@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Verificação de Peso</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .weight-display {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .weight-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .status-ok {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-error {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .history-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .history-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .weight-value {
+                font-size: 3rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Verificação de Peso</h1>
+            <p>Controle de qualidade e verificação de peças</p>
+        </div>
+
+        <div class="main-content">
+            <div id="alerts"></div>
+
+            <div class="cards-container">
+                <!-- Card de Seleção de Peça -->
+                <div class="card">
+                    <h3>Seleção de Peça</h3>
+                    <div class="form-group">
+                        <label for="pecaSelect">Tipo de Peça:</label>
+                        <select id="pecaSelect" class="form-control">
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pesoInput">Peso Medido (kg):</label>
+                        <input type="number" id="pesoInput" class="form-control" step="0.01" placeholder="0.00">
+                    </div>
+                    <button id="lerBalancaBtn" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">
+                        Ler Balança
+                    </button>
+                    <button id="verificarBtn" class="btn btn-primary" style="width: 100%;">
+                        Verificar Peso
+                    </button>
+                </div>
+
+                <!-- Card de Resultado -->
+                <div class="card">
+                    <h3>Resultado da Verificação</h3>
+                    <div class="weight-display">
+                        <div id="pesoDisplay" class="weight-value">--</div>
+                        <div id="statusDisplay" class="status-badge" style="display: none;">
+                            Aguardando verificação
+                        </div>
+                        <div id="detalhesDisplay" style="display: none;">
+                            <p><strong>Quantidade calculada:</strong> <span id="quantidadeCalculada">--</span> peças</p>
+                            <p><strong>Peso esperado:</strong> <span id="pesoEsperado">--</span> kg</p>
+                            <p><strong>Diferença:</strong> <span id="diferenca">--</span> kg</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Ações -->
+                <div class="card">
+                    <h3>Ações</h3>
+                    <button id="gerarEtiquetaBtn" class="btn btn-success" style="width: 100%; margin-bottom: 15px;" disabled>
+                        Gerar Etiqueta
+                    </button>
+                    <button id="novaVerificacaoBtn" class="btn btn-secondary" style="width: 100%;">
+                        Nova Verificação
+                    </button>
+                    <div style="margin-top: 20px;">
+                        <h4>Última Verificação:</h4>
+                        <p id="ultimaVerificacao">Nenhuma verificação realizada</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processando...</p>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card">
+                <h3>Histórico de Verificações</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Peça</th>
+                            <th>Peso</th>
+                            <th>Quantidade</th>
+                            <th>Status</th>
+                            <th>Código</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historicoBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Carregando histórico...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração da API
+        const API_BASE = window.location.origin + '/api';
+        
+        // Estado da aplicação
+        let ultimaVerificacao = null;
+        let pecas = [];
+
+        // Elementos DOM
+        const pecaSelect = document.getElementById('pecaSelect');
+        const pesoInput = document.getElementById('pesoInput');
+        const lerBalancaBtn = document.getElementById('lerBalancaBtn');
+        const verificarBtn = document.getElementById('verificarBtn');
+        const pesoDisplay = document.getElementById('pesoDisplay');
+        const statusDisplay = document.getElementById('statusDisplay');
+        const detalhesDisplay = document.getElementById('detalhesDisplay');
+        const quantidadeCalculada = document.getElementById('quantidadeCalculada');
+        const pesoEsperado = document.getElementById('pesoEsperado');
+        const diferenca = document.getElementById('diferenca');
+        const gerarEtiquetaBtn = document.getElementById('gerarEtiquetaBtn');
+        const novaVerificacaoBtn = document.getElementById('novaVerificacaoBtn');
+        const ultimaVerificacaoEl = document.getElementById('ultimaVerificacao');
+        const historicoBody = document.getElementById('historicoBody');
+        const loading = document.getElementById('loading');
+        const alerts = document.getElementById('alerts');
+
+        // Funções utilitárias
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alerts.appendChild(alertDiv);
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR');
+        }
+
+        // Funções da API
+        async function carregarPecas() {
+            try {
+                const response = await fetch(`${API_BASE}/pecas`);
+                if (!response.ok) throw new Error('Erro ao carregar peças');
+                
+                pecas = await response.json();
+                
+                if (pecas.length === 0) {
+                    // Inicializar dados se não houver peças
+                    await inicializarDados();
+                    return carregarPecas();
+                }
+                
+                pecaSelect.innerHTML = '<option value="">Selecione uma peça...</option>';
+                pecas.forEach(peca => {
+                    const option = document.createElement('option');
+                    option.value = peca.id;
+                    option.textContent = `${peca.nome} (${peca.peso_unitario}kg/peça)`;
+                    pecaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar peças:', error);
+                showAlert('Erro ao carregar peças', 'error');
+            }
+        }
+
+        async function inicializarDados() {
+            try {
+                const response = await fetch(`${API_BASE}/init-data`, {
+                    method: 'POST'
+                });
+                if (!response.ok) throw new Error('Erro ao inicializar dados');
+                showAlert('Dados inicializados com sucesso');
+            } catch (error) {
+                console.error('Erro ao inicializar dados:', error);
+                showAlert('Erro ao inicializar dados', 'error');
+            }
+        }
+
+        async function lerPesoBalanca() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/balanca/peso`);
+                if (!response.ok) throw new Error('Erro ao ler balança');
+                
+                const data = await response.json();
+                pesoInput.value = data.peso;
+                showAlert(`Peso lido da balança: ${data.peso} kg`);
+            } catch (error) {
+                console.error('Erro ao ler balança:', error);
+                showAlert('Erro ao ler peso da balança', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function verificarPeso() {
+            const pecaId = pecaSelect.value;
+            const peso = parseFloat(pesoInput.value);
+
+            if (!pecaId) {
+                showAlert('Selecione uma peça', 'error');
+                return;
+            }
+
+            if (!peso || peso <= 0) {
+                showAlert('Informe um peso válido', 'error');
+                return;
+            }
+
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/verificar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        peca_id: parseInt(pecaId),
+                        peso_medido: peso
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erro ao verificar peso');
+
+                const data = await response.json();
+                ultimaVerificacao = data.verificacao;
+                
+                // Atualizar display
+                pesoDisplay.textContent = `${peso} kg`;
+                
+                // Atualizar status
+                statusDisplay.style.display = 'block';
+                statusDisplay.className = 'status-badge';
+                
+                switch (data.verificacao.status) {
+                    case 'OK':
+                        statusDisplay.classList.add('status-ok');
+                        statusDisplay.textContent = 'PESO CORRETO';
+                        break;
+                    case 'FALTANDO':
+                        statusDisplay.classList.add('status-error');
+                        statusDisplay.textContent = 'FALTANDO PEÇAS';
+                        break;
+                    case 'SOBRANDO':
+                        statusDisplay.classList.add('status-warning');
+                        statusDisplay.textContent = 'PEÇAS EXTRAS';
+                        break;
+                }
+
+                // Atualizar detalhes
+                quantidadeCalculada.textContent = data.verificacao.quantidade_calculada;
+                pesoEsperado.textContent = data.peso_esperado.toFixed(2);
+                diferenca.textContent = data.diferenca.toFixed(2);
+                detalhesDisplay.style.display = 'block';
+
+                // Habilitar botão de etiqueta
+                gerarEtiquetaBtn.disabled = false;
+
+                // Atualizar última verificação
+                ultimaVerificacaoEl.textContent = `${data.verificacao.codigo_verificacao} - ${data.verificacao.status}`;
+
+                // Recarregar histórico
+                carregarHistorico();
+
+                showAlert('Verificação realizada com sucesso');
+            } catch (error) {
+                console.error('Erro ao verificar peso:', error);
+                showAlert('Erro ao verificar peso', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function carregarHistorico() {
+            try {
+                const response = await fetch(`${API_BASE}/verificacoes?limit=10`);
+                if (!response.ok) throw new Error('Erro ao carregar histórico');
+                
+                const verificacoes = await response.json();
+                
+                historicoBody.innerHTML = '';
+                
+                if (verificacoes.length === 0) {
+                    historicoBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhuma verificação encontrada</td></tr>';
+                    return;
+                }
+
+                verificacoes.forEach(verificacao => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formatDateTime(verificacao.data_verificacao)}</td>
+                        <td>${verificacao.peca_nome}</td>
+                        <td>${verificacao.peso_medido} kg</td>
+                        <td>${verificacao.quantidade_calculada}</td>
+                        <td><span class="status-badge ${verificacao.status === 'OK' ? 'status-ok' : verificacao.status === 'FALTANDO' ? 'status-error' : 'status-warning'}">${verificacao.status}</span></td>
+                        <td>${verificacao.codigo_verificacao}</td>
+                    `;
+                    historicoBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                historicoBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Erro ao carregar histórico</td></tr>';
+            }
+        }
+
+        function novaVerificacao() {
+            // Limpar formulário
+            pecaSelect.value = '';
+            pesoInput.value = '';
+            
+            // Limpar display
+            pesoDisplay.textContent = '--';
+            statusDisplay.style.display = 'none';
+            detalhesDisplay.style.display = 'none';
+            
+            // Desabilitar botão de etiqueta
+            gerarEtiquetaBtn.disabled = true;
+            
+            ultimaVerificacao = null;
+        }
+
+        function gerarEtiqueta() {
+            if (!ultimaVerificacao) {
+                showAlert('Nenhuma verificação para gerar etiqueta', 'error');
+                return;
+            }
+
+            // Abrir etiqueta em nova aba para download
+            const url = `${API_BASE}/etiqueta/${ultimaVerificacao.codigo_verificacao}`;
+            window.open(url, '_blank');
+            
+            showAlert('Etiqueta gerada com sucesso');
+        }
+
+        // Event listeners
+        lerBalancaBtn.addEventListener('click', lerPesoBalanca);
+        verificarBtn.addEventListener('click', verificarPeso);
+        gerarEtiquetaBtn.addEventListener('click', gerarEtiqueta);
+        novaVerificacaoBtn.addEventListener('click', novaVerificacao);
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarPecas();
+            carregarHistorico();
+        });
+    </script>
+</body>
+</html>
+
